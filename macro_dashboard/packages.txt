@@ -1,2 +1,0 @@
-# No system packages required.
-# This file tells Streamlit Cloud the app has no apt-get dependencies.
