@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Burry Playbook — Signal Ledger</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --bg:        #0c0c0b;
+    --bg2:       #111110;
+    --bg3:       #181817;
+    --border:    rgba(255,255,255,.07);
+    --border2:   rgba(255,255,255,.12);
+    --ink:       #e8e6df;
+    --ink2:      #9e9b92;
+    --ink3:      #5a5852;
+    --red:       #c0392b;
+    --red-l:     #e57373;
+    --red-bg:    rgba(192,57,43,.12);
+    --amber:     #d4a847;
+    --amber-l:   #f0c060;
+    --amber-bg:  rgba(212,168,71,.10);
+    --green:     #52b47a;
+    --green-l:   #7dcf9a;
+    --green-bg:  rgba(82,180,122,.10);
+    --blue:      #6ba3d6;
+    --blue-bg:   rgba(107,163,214,.10);
+    --accent:    #d4a847;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── Page grain texture ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+  }
+
+  .page { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 60px 32px 100px; }
+
+  /* ── Header ── */
+  .masthead {
+    border-bottom: 0.5px solid var(--border2);
+    padding-bottom: 40px;
+    margin-bottom: 60px;
+  }
+
+  .masthead-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+  }
+
+  .logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--ink3);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+
+  .logo span {
+    color: var(--accent);
+  }
+
+  .version {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--ink3);
+    letter-spacing: .06em;
+  }
+
+  .masthead h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(38px, 6vw, 64px);
+    font-weight: 400;
+    line-height: 1.05;
+    color: var(--ink);
+    letter-spacing: -.02em;
+    margin-bottom: 10px;
+  }
+
+  .masthead h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .masthead-sub {
+    font-size: 14px;
+    color: var(--ink2);
+    max-width: 560px;
+    line-height: 1.7;
+  }
+
+  /* ── Section headers ── */
+  .section {
+    margin-bottom: 56px;
+  }
+
+  .section-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: .1em;
+    margin-bottom: 8px;
+  }
+
+  .section h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    font-weight: 400;
+    color: var(--ink);
+    letter-spacing: -.01em;
+    margin-bottom: 20px;
+    line-height: 1.15;
+  }
+
+  /* ── Burry origin story ── */
+  .origin-card {
+    background: var(--bg2);
+    border: 0.5px solid var(--border2);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 24px 28px;
+    margin-bottom: 28px;
+  }
+
+  .origin-quote {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    font-style: italic;
+    color: var(--ink);
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+
+  .origin-attr {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--ink3);
+  }
+
+  /* ── Comparison table ── */
+  .compare-wrap {
+    display: grid;
+    grid-template-columns: 140px 1fr 1fr 1fr;
+    border: 0.5px solid var(--border2);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 28px;
+    font-size: 12px;
+  }
+
+  .ct-cell {
+    padding: 11px 14px;
+    border-bottom: 0.5px solid var(--border);
+    border-right: 0.5px solid var(--border);
+    line-height: 1.4;
+    color: var(--ink2);
+  }
+
+  .ct-cell:nth-child(4n) { border-right: none; }
+  .ct-row-last .ct-cell  { border-bottom: none; }
+
+  .ct-head {
+    background: var(--bg3);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    font-weight: 400;
+  }
+
+  .ct-label {
+    background: var(--bg3);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ink2);
+  }
+
+  .ct-good  { color: var(--green-l); }
+  .ct-warn  { color: var(--amber-l); }
+  .ct-bad   { color: var(--red-l); }
+  .ct-burry { background: rgba(212,168,71,.06); }
+
+  /* ── Structure diagram ── */
+  .struct-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .struct-card {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    position: relative;
+  }
+
+  .struct-card.highlight {
+    border-color: var(--accent);
+    background: var(--amber-bg);
+  }
+
+  .struct-card.highlight::after {
+    content: 'BURRY STRUCTURE';
+    position: absolute;
+    top: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: #0c0c0b;
+    font-family: 'DM Mono', monospace;
+    font-size: 8px;
+    font-weight: 500;
+    letter-spacing: .1em;
+    padding: 2px 8px;
+    border-radius: 0 0 5px 5px;
+  }
+
+  .sc-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+
+  .sc-icon.red    { background: var(--red-bg); }
+  .sc-icon.amber  { background: var(--amber-bg); }
+  .sc-icon.green  { background: var(--green-bg); }
+
+  .sc-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+
+  .sc-rows { font-size: 11px; color: var(--ink2); line-height: 1.8; }
+  .sc-rows strong { color: var(--ink); font-weight: 500; }
+
+  .sc-verdict {
+    margin-top: 12px;
+    padding: 7px 10px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .sc-verdict.bad   { background: var(--red-bg); color: var(--red-l); }
+  .sc-verdict.ok    { background: var(--amber-bg); color: var(--amber-l); }
+  .sc-verdict.good  { background: var(--green-bg); color: var(--green-l); }
+
+  /* ── How it works — numbered steps ── */
+  .steps {
+    counter-reset: step;
+    margin-bottom: 28px;
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 16px;
+    margin-bottom: 4px;
+    padding: 18px 0;
+    border-bottom: 0.5px solid var(--border);
+  }
+
+  .step:last-child { border-bottom: none; }
+
+  .step-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    padding-top: 2px;
+  }
+
+  .step-body {}
+
+  .step-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 5px;
+  }
+
+  .step-text {
+    font-size: 12px;
+    color: var(--ink2);
+    line-height: 1.65;
+  }
+
+  .step-mono {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--amber-l);
+    background: var(--amber-bg);
+    padding: 6px 10px;
+    border-radius: 5px;
+    margin-top: 8px;
+    display: inline-block;
+  }
+
+  /* ── Trade cards ── */
+  .trade-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .trade-card {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .tc-head {
+    padding: 14px 16px;
+    border-bottom: 0.5px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .tc-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 3px;
+  }
+
+  .tc-type {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--ink3);
+    letter-spacing: .05em;
+  }
+
+  .tc-badge {
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: .04em;
+    flex-shrink: 0;
+    margin-left: 8px;
+    margin-top: 2px;
+  }
+
+  .badge-active    { background: var(--green-bg); color: var(--green-l); border: 0.5px solid rgba(82,180,122,.3); }
+  .badge-watch     { background: var(--amber-bg); color: var(--amber-l); border: 0.5px solid rgba(212,168,71,.3); }
+  .badge-monitor   { background: var(--bg3); color: var(--ink3); border: 0.5px solid var(--border); }
+
+  .tc-body { padding: 14px 16px; }
+
+  .tc-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 4px 0;
+    border-bottom: 0.5px solid var(--border);
+    font-size: 11px;
+  }
+
+  .tc-row:last-child { border-bottom: none; }
+
+  .tc-key   { color: var(--ink3); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .04em; }
+  .tc-val   { color: var(--ink2); text-align: right; max-width: 60%; line-height: 1.4; }
+  .tc-val.g { color: var(--green-l); }
+  .tc-val.a { color: var(--amber-l); }
+  .tc-val.r { color: var(--red-l); }
+
+  .tc-trigger {
+    margin-top: 10px;
+    padding: 8px 10px;
+    background: var(--blue-bg);
+    border: 0.5px solid rgba(107,163,214,.2);
+    border-radius: 6px;
+    font-size: 11px;
+    color: var(--blue);
+    line-height: 1.55;
+  }
+
+  /* ── Pullback guide ── */
+  .pullback-row {
+    display: grid;
+    grid-template-columns: 100px 80px 1fr 100px;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 0.5px solid var(--border);
+    font-size: 12px;
+    gap: 12px;
+  }
+
+  .pullback-row:last-child { border-bottom: none; }
+
+  .pb-ticker {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .pb-entry  { color: var(--amber-l); font-size: 11px; }
+  .pb-thesis { color: var(--ink2); line-height: 1.4; font-size: 11px; }
+  .pb-exit   { color: var(--red-l); font-size: 11px; text-align: right; }
+
+  /* ── Key rules ── */
+  .rules-list {
+    list-style: none;
+    margin-bottom: 28px;
+  }
+
+  .rules-list li {
+    padding: 14px 0;
+    border-bottom: 0.5px solid var(--border);
+    display: grid;
+    grid-template-columns: 20px 1fr;
+    gap: 14px;
+    font-size: 13px;
+    color: var(--ink2);
+    line-height: 1.5;
+  }
+
+  .rules-list li:last-child { border-bottom: none; }
+
+  .rules-list li::before {
+    content: '—';
+    color: var(--accent);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .rules-list strong { color: var(--ink); font-weight: 500; }
+
+  /* ── Sizing table ── */
+  .sizing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .sz-card {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+  }
+
+  .sz-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .sz-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+
+  .sz-note {
+    font-size: 11px;
+    color: var(--ink3);
+    line-height: 1.55;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    border-top: 0.5px solid var(--border);
+    padding-top: 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-note {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--ink3);
+    line-height: 1.7;
+  }
+
+  .footer-disclaimer {
+    font-size: 10px;
+    color: var(--ink3);
+    max-width: 360px;
+    text-align: right;
+    line-height: 1.6;
+  }
+
+  /* ── Divider ── */
+  .rule {
+    border: none;
+    border-top: 0.5px solid var(--border);
+    margin: 40px 0;
+  }
+
+  /* ── Inline code ── */
+  code {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    background: var(--bg3);
+    color: var(--amber-l);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  /* ── Animations ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .section {
+    animation: fadeUp .5s ease both;
+  }
+
+  .section:nth-child(2)  { animation-delay: .05s; }
+  .section:nth-child(3)  { animation-delay: .10s; }
+  .section:nth-child(4)  { animation-delay: .15s; }
+  .section:nth-child(5)  { animation-delay: .20s; }
+  .section:nth-child(6)  { animation-delay: .25s; }
+  .section:nth-child(7)  { animation-delay: .30s; }
+
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Masthead -->
+  <div class="masthead">
+    <div class="masthead-top">
+      <div class="logo">Macro Signal Ledger · <span>Burry Engine v1</span></div>
+      <div class="version">March 2026 · Confidential reference</div>
+    </div>
+    <h1>The <em>Burry</em> Playbook</h1>
+    <p class="masthead-sub">
+      A reference guide to the investment structure, entry signals, exit signals,
+      and sizing rules used by the Macro Signal Ledger's action engine.
+      Based on Michael Burry's Big Short methodology adapted for a physician investor
+      transitioning from residency through a gap year to fellowship.
+    </p>
+  </div>
+
+  <!-- Section 1: What Burry actually did -->
+  <div class="section">
+    <div class="section-num">01 — ORIGIN</div>
+    <h2>What Burry actually did</h2>
+
+    <div class="origin-card">
+      <div class="origin-quote">
+        "I don't look at things the way other people do. I look at the raw data."
+      </div>
+      <div class="origin-attr">— Michael Burry, Scion Capital</div>
+    </div>
+
+    <p style="font-size: 13px; color: var(--ink2); line-height: 1.8; margin-bottom: 20px;">
+      In 2005–2007, Burry didn't short mortgage bonds directly.
+      He purchased <strong style="color:var(--ink)">credit default swaps (CDS)</strong> —
+      insurance contracts that paid out if mortgage-backed securities failed.
+      His maximum loss was the premium he paid each quarter, regardless of how wrong he was or how long he waited.
+      His upside was 100x if the thesis played out.
+      He held for <strong style="color:var(--ink)">two full years</strong> while investors screamed at him to close.
+      The thesis was right. The timing was uncertain. The structure absorbed the uncertainty.
+    </p>
+
+    <p style="font-size: 13px; color: var(--ink2); line-height: 1.8;">
+      The three elements that made it work:
+      (1) <strong style="color:var(--ink)">Defined maximum loss</strong> — only the premium, nothing more.
+      (2) <strong style="color:var(--ink)">Asymmetric payoff</strong> — small outlay, large return if right.
+      (3) <strong style="color:var(--ink)">Thesis-driven holding</strong> — he didn't exit because the price moved against him,
+      only because the thesis changed.
+    </p>
+  </div>
+
+  <!-- Section 2: Strategy comparison -->
+  <div class="section">
+    <div class="section-num">02 — STRUCTURE</div>
+    <h2>Why not just short it?</h2>
+
+    <div class="compare-wrap">
+      <!-- Header row -->
+      <div class="ct-cell ct-head ct-label"></div>
+      <div class="ct-cell ct-head">Direct short / inverse ETF</div>
+      <div class="ct-cell ct-head">Pullback buying</div>
+      <div class="ct-cell ct-head ct-burry">Burry puts (thesis hedge)</div>
+
+      <div class="ct-cell ct-label">What it is</div>
+      <div class="ct-cell">Borrow and sell shares, profit if price falls</div>
+      <div class="ct-cell">Buy quality assets at fear-driven discounts</div>
+      <div class="ct-cell ct-burry">Pay fixed premium for right to profit if thesis plays out</div>
+
+      <div class="ct-cell ct-label">Max loss</div>
+      <div class="ct-cell ct-bad">Unlimited. Stock +300% = you owe 300%.</div>
+      <div class="ct-cell ct-good">Only if asset goes to zero (XLE won't)</div>
+      <div class="ct-cell ct-burry ct-good">Premium paid only. Defined. Cannot lose more.</div>
+
+      <div class="ct-cell ct-label">Timing required</div>
+      <div class="ct-cell ct-bad">Very high. Wrong by 3 months = wiped out.</div>
+      <div class="ct-cell ct-good">Low — buying dips is forgiving, no expiry</div>
+      <div class="ct-cell ct-burry ct-warn">Medium — choose expiry that outlasts the thesis</div>
+
+      <div class="ct-cell ct-label">Fits your life stage</div>
+      <div class="ct-cell ct-bad">No. Gap year cash flow is critical.</div>
+      <div class="ct-cell ct-good">Yes — accumulate quality during volatility</div>
+      <div class="ct-cell ct-burry ct-good">Yes — small size, defined loss, Roth IRA only</div>
+
+      <div class="ct-cell ct-label">Burry used this?</div>
+      <div class="ct-cell ct-bad">Never.</div>
+      <div class="ct-cell ct-warn">Implicitly — long undervalued companies alongside shorts</div>
+      <div class="ct-cell ct-burry ct-good">Yes. CDS = puts on mortgage bonds. Exact structure.</div>
+
+      <div class="ct-cell ct-label" style="border-bottom:none">Run in our model</div>
+      <div class="ct-cell" style="border-bottom:none;color:var(--ink3)">Not used</div>
+      <div class="ct-cell" style="border-bottom:none;color:var(--ink3)">XLE, EWY, QQQ, IAU plays</div>
+      <div class="ct-cell ct-burry" style="border-bottom:none;color:var(--amber-l)">HYG, NVDA, PLTR puts — Roth IRA</div>
+    </div>
+  </div>
+
+  <!-- Section 3: The two strategies -->
+  <div class="section">
+    <div class="section-num">03 — TWO STRATEGIES</div>
+    <h2>Running both simultaneously</h2>
+
+    <div class="struct-grid">
+      <div class="struct-card">
+        <div class="sc-icon red">↓</div>
+        <div class="sc-name">Direct short</div>
+        <div class="sc-rows">
+          <strong>Not used.</strong><br>
+          Unlimited loss potential.<br>
+          Requires precise timing.<br>
+          Bleeds daily if early.<br>
+          Incompatible with<br>gap-year cash flow needs.
+        </div>
+        <div class="sc-verdict bad">Eliminated from model</div>
+      </div>
+
+      <div class="struct-card">
+        <div class="sc-icon green">↑</div>
+        <div class="sc-name">Pullback buying</div>
+        <div class="sc-rows">
+          <strong>Long book.</strong><br>
+          Buy quality on fear dips.<br>
+          XLE, IAU, EWY, QQQ.<br>
+          Model fires entry signal.<br>
+          Hold until thesis<br>invalidation or exit rule.
+        </div>
+        <div class="sc-verdict good">Active — 4 positions</div>
+      </div>
+
+      <div class="struct-card highlight">
+        <div class="sc-icon amber">◈</div>
+        <div class="sc-name">Burry puts</div>
+        <div class="sc-rows">
+          <strong>Thesis hedge book.</strong><br>
+          Fixed premium only.<br>
+          OTM, 6–9mo expiry.<br>
+          Roth IRA for tax efficiency.<br>
+          Two signals must confirm<br>before entry.
+        </div>
+        <div class="sc-verdict ok">Active — 2 theses</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 4: How the put structure works -->
+  <div class="section">
+    <div class="section-num">04 — PUT MECHANICS</div>
+    <h2>How the Burry put structure works</h2>
+
+    <div class="steps">
+
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-body">
+          <div class="step-title">Identify a structural flaw</div>
+          <div class="step-text">
+            Not a price prediction — a thesis about a system that will break.
+            Burry identified that mortgage underwriting standards had collapsed.
+            Our theses: PE firms hold $2.5T in floating-rate debt that becomes unserviceable at 5%+ rates;
+            AI companies at 30–60x revenue face multiple compression from energy costs and rate sensitivity.
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-body">
+          <div class="step-title">Wait for two independent signals to confirm</div>
+          <div class="step-text">
+            Burry didn't just believe the thesis — he required data. For HYG puts:
+            both HYG credit spreads <em>and</em> the PE equity basket must deteriorate simultaneously.
+            One signal is noise. Two independent streams are signal.
+          </div>
+          <div class="step-mono">entry = (HYG 5d return &lt; −1.5%) AND (PE basket vs SPY 10d &lt; −5%)</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-body">
+          <div class="step-title">Buy OTM puts — pay the premium, define the loss</div>
+          <div class="step-text">
+            Strike 5–8% below current price for HYG, 15–25% below for NVDA/PLTR.
+            Out-of-the-money = cheaper premium, larger payoff if right.
+            Expiry 6–9 months — enough time for the thesis to develop.
+            Never buy 30-day puts on a multi-month thesis.
+          </div>
+          <div class="step-mono">max loss = premium paid · max gain = (strike − price at expiry) × 100 per contract</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-body">
+          <div class="step-title">Hold through the pain — exit only on thesis change</div>
+          <div class="step-text">
+            Burry held for two years while investors tried to pull their money.
+            The puts may decay for months with no movement.
+            Do not exit because the price moved against you — exit only if the thesis invalidates:
+            Fed cuts rates, peace deal hits, or credit spreads tighten.
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">05</div>
+        <div class="step-body">
+          <div class="step-title">Tax-efficient execution — Roth IRA only</div>
+          <div class="step-text">
+            Put gains are short-term capital gains, taxed as ordinary income.
+            At your attending marginal rate (37%), a 4× win in taxable becomes a 2.5× win after tax.
+            In Roth IRA: entirely tax-free. The structure only works in the right account.
+          </div>
+          <div class="step-mono">Roth IRA: put gains → tax-free · taxable account: put gains → 37% ordinary income</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Section 5: Live trade cards -->
+  <div class="section">
+    <div class="section-num">05 — LIVE TRADES</div>
+    <h2>Current model positions</h2>
+
+    <div class="trade-grid">
+
+      <!-- HYG puts -->
+      <div class="trade-card">
+        <div class="tc-head">
+          <div>
+            <div class="tc-name">HYG puts — PE short</div>
+            <div class="tc-type">BURRY STRUCTURE · ROTH IRA</div>
+          </div>
+          <div class="tc-badge badge-watch">WATCH</div>
+        </div>
+        <div class="tc-body">
+          <div class="tc-row">
+            <div class="tc-key">INSTRUMENT</div>
+            <div class="tc-val">HYG puts · 5–8% OTM</div>
+          </div>
+          <div class="tc-row">
+            <div class="tc-key">EXPIRY</div>
+            <div class="tc-val">6–9 months</div>
+          </div>
+          <div class="tc-row">
+            <div class="tc-key">SIZE</div>
+            <div class="tc-val a">8–10% of Roth IRA (premium)</div>
+          </div>
+          <div class="tc-row">
+            <div class="tc-key">ACCOUNT</div>
+            <div class="tc-val">Roth IRA only</div>
+          </div>
+          <div class="tc-row">
+            <div class="tc-key">MAX LOSS</div>
+            <div class="tc-val g">Premium paid only</div>
+          </div>
+          <div class="tc-row">
+            <div class="tc-key">EXIT PROFIT</div>
+            <div class="tc-val">HYG drops to strike → roll or take</div>
+          </div>
+          <div class="tc-row">
+            <div class="tc-key">INVALIDATION</div>
+            <div class="tc-val r">Fed cuts OR HYG recovers 3 days</div>
+          </div>
+          <div class="tc-trigger">
+            <strong>Entry:</strong> HYG 5d &lt; −1.5% AND PE basket vs SPY 10d &lt; −5% — both simultaneously
+          </div>
+        </div>
+      </div>
+
+      <!-- NVDA/PLTR puts -->
+      <div class="trade-card">
+        <div class="tc-head">
+          <div>
+            <div class="tc-name">NVDA / PLTR puts — AI short</div>
+            <div class="tc-type">BURRY STRUCTURE · ROTH IRA · LOTTERY</div>
+          </div>
+          <div class="tc-badge badge-watch">WATCH</div>
+        </div>
+        <div class="tc-body">
+          <div class="tc-row">
+            <div class="tc-key">INSTRUMENT</div>
+            <div class="tc-val">NVDA + PLTR puts · 15–25% OTM</div>
+          </div>
+          <div class="tc-row">
+            <div class="tc-key">EXPIRY</div>
+            <div class="tc-val">6–9 months</div>
+          </div>
+          <div class="tc-row">
+            <div class="tc-key">SIZE</div>
+            <div class="tc-val a">&lt;2% of Roth IRA total (premium)</div>
+          </div>
+          <div class="tc-row">
+            <div class="tc-key">ACCOUNT</div>
+            <div class="tc-val">Roth IRA only</div>
+          </div>
+          <div class="tc-row">
+            <div class="tc-key">MAX LOSS</div>
+            <div class="tc-val g">Premium paid only — lottery sized</div>
+          </div>
+          <div class="tc-row">
+            <div class="tc-key">EXIT PROFIT</div>
+            <div class="tc-val">50–75% premium gain OR earnings miss</div>
+          </div>
+          <div class="tc-row">
+            <div class="tc-key">INVALIDATION</div>
+            <div class="tc-val r">Oil &lt; $85 OR Fed pivot to cuts</div>
+          </div>
+          <div class="tc-trigger">
+            <strong>Entry:</strong> S&P &gt;5 sessions below 200d AND oil ≥ $95 AND QQQ down &gt;15% from peak
+          </div>
+        </div>
+      </div>
+
+      <!-- IAU pullback -->
+      <div class="trade-card">
+        <div class="tc-head">
+          <div>
+            <div class="tc-name">IAU — gold pullback accumulation</div>
+            <div class="tc-type">PULLBACK STRATEGY · TAXABLE</div>
+          </div>
+          <div class="tc-badge badge-active">ACTIVE</div>
+        </div>
+        <div class="tc-body">
+          <div class="tc-row">
+            <div class="tc-key">INSTRUMENT</div>
+            <div class="tc-val">IAU (iShares Gold Trust)</div>
+          </div>
+          <div class="tc-row">
+            <div class="tc-key">TARGET SIZE</div>
+            <div class="tc-val a">10% of taxable portfolio</div>
+          </div>
+          <div class="tc-row">
+            <div class="tc-key">ADD ZONE</div>
+            <div class="tc-val">8–12% pullback from recent high</div>
+          </div>
+          <div class="tc-row">
+            <div class="tc-key">PATTERN</div>
+            <div class="tc-val">1979 parabolic — accumulate phase</div>
+          </div>
+          <div class="tc-row">
+            <div class="tc-key">EXIT SIGNAL</div>
+            <div class="tc-val r">Gold &gt;40% in 60d → reduce 40–50%</div>
+          </div>
+          <div class="tc-trigger">
+            <strong>1979 reversal watch:</strong> Model fires "Gold reversal risk" rule when gold up &gt;40% in 60 days — that is the exit signal, not a price target
+          </div>
+        </div>
+      </div>
+
+      <!-- XLE -->
+      <div class="trade-card">
+        <div class="tc-head">
+          <div>
+            <div class="tc-name">XLE — hold, watch divergence</div>
+            <div class="tc-type">PULLBACK STRATEGY · TAXABLE</div>
+          </div>
+          <div class="tc-badge badge-active">HOLD</div>
+        </div>
+        <div class="tc-body">
+          <div class="tc-row">
+            <div class="tc-key">INSTRUMENT</div>
+            <div class="tc-val">XLE (Energy Select Sector ETF)</div>
+          </div>
+          <div class="tc-row">
+            <div class="tc-key">CURRENT SIZE</div>
+            <div class="tc-val a">10% of taxable (current)</div>
+          </div>
+          <div class="tc-row">
+            <div class="tc-key">ADD ZONE</div>
+            <div class="tc-val">8% pullback AND oil still &gt; $90</div>
+          </div>
+          <div class="tc-row">
+            <div class="tc-key">DO NOT</div>
+            <div class="tc-val r">Add near highs — 23 days in, too late</div>
+          </div>
+          <div class="tc-row">
+            <div class="tc-key">EXIT SIGNAL</div>
+            <div class="tc-val r">XLE/oil divergence rule fires → sell immediately</div>
+          </div>
+          <div class="tc-trigger">
+            <strong>Peace signal:</strong> XLE falls &gt;7% over 10 days while WTI holds above $90 — model fires "XLE/oil divergence" — sell immediately
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- EWY and QQQ smaller -->
+    <div class="compare-wrap" style="grid-template-columns: 140px 1fr 1fr; font-size:11px; margin-bottom:0">
+      <div class="ct-cell ct-head ct-label"></div>
+      <div class="ct-cell ct-head">EWY — Korea peace trade</div>
+      <div class="ct-cell ct-head">QQQ — buy the capitulation</div>
+
+      <div class="ct-cell ct-label">Status</div>
+      <div class="ct-cell" style="color:var(--ink3)">Monitoring — not yet</div>
+      <div class="ct-cell" style="color:var(--ink3)">Monitoring — not yet</div>
+
+      <div class="ct-cell ct-label">Entry trigger</div>
+      <div class="ct-cell">VIX &gt;35 AND EWY down &gt;15% from pre-conflict high</div>
+      <div class="ct-cell">VIX &gt;40 AND QQQ down &gt;20% AND oil stabilizing</div>
+
+      <div class="ct-cell ct-label">Thesis</div>
+      <div class="ct-cell">Korea prices peace fastest — buy the washout before consensus</div>
+      <div class="ct-cell">Median oil shock = −23% S&P. At −6.7% we are not close to washout.</div>
+
+      <div class="ct-cell ct-label" style="border-bottom:none">Size</div>
+      <div class="ct-cell" style="border-bottom:none;color:var(--amber-l)">5% taxable on confirmed entry</div>
+      <div class="ct-cell" style="border-bottom:none;color:var(--amber-l)">5–8% taxable on confirmed capitulation</div>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <!-- Section 6: Pullback guide -->
+  <div class="section">
+    <div class="section-num">06 — PULLBACK REFERENCE</div>
+    <h2>When to add vs when to wait</h2>
+
+    <div class="pullback-row" style="border-bottom:0.5px solid var(--border2); padding-bottom:8px; margin-bottom:4px;">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.06em;color:var(--ink3)">TICKER</div>
+      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.06em;color:var(--ink3)">ADD ZONE</div>
+      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.06em;color:var(--ink3)">THESIS REQUIREMENT</div>
+      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.06em;color:var(--ink3);text-align:right">EXIT SIGNAL</div>
+    </div>
+
+    <div class="pullback-row">
+      <div class="pb-ticker">IAU</div>
+      <div class="pb-entry">8–12% below<br>recent high</div>
+      <div class="pb-thesis">Oil above $90. Gold not yet in 1979 reversal zone (&lt;40% in 60d). 1979 pattern confirms dollar weakness ongoing.</div>
+      <div class="pb-exit">Model fires: "Gold 1979 reversal risk" → reduce 40–50%</div>
+    </div>
+
+    <div class="pullback-row">
+      <div class="pb-ticker">XLE</div>
+      <div class="pb-entry">8% below<br>recent high</div>
+      <div class="pb-thesis">Oil above $90. No XLE/oil divergence detected. Conflict not showing signs of resolution.</div>
+      <div class="pb-exit">Model fires: "XLE/oil divergence" → sell immediately</div>
+    </div>
+
+    <div class="pullback-row">
+      <div class="pb-ticker">EWY</div>
+      <div class="pb-entry">VIX &gt;35<br>&gt;15% below high</div>
+      <div class="pb-thesis">Peak fear confirmed. Korea at maximum discount. Peace signal or Hormuz reopening on the horizon.</div>
+      <div class="pb-exit">+20% from entry OR peace confirmed — take profits quickly</div>
+    </div>
+
+    <div class="pullback-row">
+      <div class="pb-ticker">QQQ</div>
+      <div class="pb-entry">VIX &gt;40<br>&gt;20% from peak</div>
+      <div class="pb-thesis">VIX capitulation rule fires. Oil stabilizing. Do not buy first or second dip — wait for washout.</div>
+      <div class="pb-exit">12-month hold minimum from capitulation entry</div>
+    </div>
+
+    <div class="pullback-row">
+      <div class="pb-ticker">GDX</div>
+      <div class="pb-entry">GDX &gt;10%<br>below high</div>
+      <div class="pb-thesis">Gold 1979 pattern active. Miners offer levered gold exposure. Roth IRA via calls for tax efficiency.</div>
+      <div class="pb-exit">Same as IAU — gold reversal risk rule fires</div>
+    </div>
+
+  </div>
+
+  <!-- Section 7: The rules -->
+  <div class="section">
+    <div class="section-num">07 — IRON RULES</div>
+    <h2>The rules that don't bend</h2>
+
+    <ul class="rules-list">
+      <li>
+        <strong>Total put premium never exceeds 5% of investable assets.</strong>
+        If every put expires worthless, you barely notice and the core portfolio is untouched.
+      </li>
+      <li>
+        <strong>All puts go in the Roth IRA.</strong>
+        Short-term options gains taxed as ordinary income at 37% in taxable. Tax-free in Roth.
+        The structure only works in the right account.
+      </li>
+      <li>
+        <strong>Two independent signals must confirm before any put entry.</strong>
+        One signal is noise. Two independent streams are the Burry discipline.
+        HYG alone is not enough. PE basket alone is not enough. Both together — enter.
+      </li>
+      <li>
+        <strong>Exit on thesis change, not on price movement.</strong>
+        If the put is bleeding but the thesis is intact — hold.
+        If the thesis invalidates (Fed cuts, peace deal, credit spreads tighten) — exit regardless of P&L.
+      </li>
+      <li>
+        <strong>Buy OTM, not ATM.</strong>
+        ATM options are expensive and give limited asymmetry.
+        OTM options are cheap, expire worthless more often, but when the thesis hits —
+        the payoff is 3–10× the premium. That's the Burry structure.
+      </li>
+      <li>
+        <strong>Never add to a losing put position.</strong>
+        Averaging down on options accelerates premium decay. Size correctly at entry and hold or exit.
+      </li>
+      <li>
+        <strong>Cash preservation through June 2026 is non-negotiable.</strong>
+        Gap year transition creates cash flow risk. No new put positions until Banner contract is confirmed
+        and first paycheck arrives. The model watches — you wait.
+      </li>
+    </ul>
+  </div>
+
+  <!-- Section 8: Sizing -->
+  <div class="section">
+    <div class="section-num">08 — SIZING</div>
+    <h2>Portfolio allocation reference</h2>
+
+    <div class="sizing-grid">
+      <div class="sz-card">
+        <div class="sz-num">40%</div>
+        <div class="sz-label">VTI + VXUS</div>
+        <div class="sz-note">Core long. Low turnover. 401k and taxable. Never touch regardless of macro view.</div>
+      </div>
+      <div class="sz-card">
+        <div class="sz-num">25%</div>
+        <div class="sz-label">XLE + IAU + PDBC</div>
+        <div class="sz-note">Inflation hedge. Hold through Scenario B. Add on pullbacks per pullback guide above.</div>
+      </div>
+      <div class="sz-card">
+        <div class="sz-num">15%</div>
+        <div class="sz-label">TBF + SGOV</div>
+        <div class="sz-note">Rate hedge and cash equivalent. Yields rising — TBF benefits. SGOV is safe harbor.</div>
+      </div>
+      <div class="sz-card">
+        <div class="sz-num">15%</div>
+        <div class="sz-label">Cash (HYSA)</div>
+        <div class="sz-note">Transition buffer through June 2026. Do not invest until Banner first paycheck confirmed.</div>
+      </div>
+      <div class="sz-card" style="border-color: rgba(212,168,71,.3); background: var(--amber-bg);">
+        <div class="sz-num" style="color:var(--amber-l)">3%</div>
+        <div class="sz-label">HYG puts + EWY</div>
+        <div class="sz-note">Burry thesis puts. Roth IRA only. Max loss = premium paid. Enter on dual signal confirmation.</div>
+      </div>
+      <div class="sz-card" style="border-color: rgba(212,168,71,.3); background: var(--amber-bg);">
+        <div class="sz-num" style="color:var(--amber-l)">2%</div>
+        <div class="sz-label">NVDA + PLTR puts</div>
+        <div class="sz-note">Deep OTM lottery structure. Roth IRA only. If both expire worthless — entirely negligible.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 9: Asset location -->
+  <div class="section">
+    <div class="section-num">09 — ASSET LOCATION</div>
+    <h2>Where each asset lives — and why the tax code decides</h2>
+
+    <p style="font-size:13px;color:var(--ink2);line-height:1.8;margin-bottom:28px;">
+      Asset location is the zero-cost optimization most investors ignore.
+      The <em>same</em> asset generates dramatically different after-tax returns
+      depending on which account holds it. At your attending income (~$401K gap year),
+      the wrong location can cost 15–25 percentage points of return annually —
+      on assets you already own.
+    </p>
+
+    <!-- Account type headers -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;">
+      <div style="padding:14px 16px;background:var(--bg2);border:0.5px solid rgba(107,163,214,.3);border-radius:10px;border-top:3px solid var(--blue);">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--blue);letter-spacing:.07em;margin-bottom:6px;">TAXABLE BROKERAGE</div>
+        <div style="font-size:12px;font-weight:500;color:var(--ink);margin-bottom:5px;">Taxed on dividends + gains annually</div>
+        <div style="font-size:11px;color:var(--ink3);line-height:1.6;">Foreign tax credit works here. Low-turnover, tax-efficient assets only. Never hold high-dividend or collectible assets here.</div>
+      </div>
+      <div style="padding:14px 16px;background:var(--bg2);border:0.5px solid rgba(82,180,122,.3);border-radius:10px;border-top:3px solid var(--green);">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--green);letter-spacing:.07em;margin-bottom:6px;">401K / 457B / HSA</div>
+        <div style="font-size:12px;font-weight:500;color:var(--ink);margin-bottom:5px;">Tax-deferred — grow untouched, pay on withdrawal</div>
+        <div style="font-size:11px;color:var(--ink3);line-height:1.6;">K-1 forms irrelevant. Ordinary dividend drag eliminated. Best for high-income, high-turnover assets you'd otherwise pay 40.8% on annually.</div>
+      </div>
+      <div style="padding:14px 16px;background:var(--bg2);border:0.5px solid rgba(212,168,71,.3);border-radius:10px;border-top:3px solid var(--accent);">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--amber-l);letter-spacing:.07em;margin-bottom:6px;">ROTH IRA / HSA INVESTED</div>
+        <div style="font-size:12px;font-weight:500;color:var(--ink);margin-bottom:5px;">Tax-free — never taxed again, ever</div>
+        <div style="font-size:11px;color:var(--ink3);line-height:1.6;">Reserve for highest-growth and speculative assets. A 5× put win in taxable = 2.5× after 40.8% tax. In Roth: the full 5×. Space is scarce — use it wisely.</div>
+      </div>
+    </div>
+
+    <!-- The master table -->
+    <div style="border:0.5px solid var(--border2);border-radius:10px;overflow:hidden;margin-bottom:20px;">
+
+      <!-- Header -->
+      <div style="display:grid;grid-template-columns:130px 1fr 120px 1fr;background:var(--bg3);padding:9px 14px;border-bottom:0.5px solid var(--border2);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.06em;color:var(--ink3);">
+        <div>Asset</div>
+        <div>Why this account</div>
+        <div>Optimal home</div>
+        <div>Tax trap if placed wrong</div>
+      </div>
+
+      <!-- VTI -->
+      <div style="display:grid;grid-template-columns:130px 1fr 120px 1fr;padding:11px 14px;border-bottom:0.5px solid var(--border);align-items:start;gap:0;font-size:11px;">
+        <div style="font-family:'DM Mono',monospace;color:var(--ink);font-weight:500;">VTI</div>
+        <div style="color:var(--ink2);line-height:1.5;padding-right:12px;">Low turnover — only taxed when you sell. Qualified dividends at 23.8% rate. No capital gains distributions. The ideal taxable asset.</div>
+        <div><span style="background:var(--blue-bg);color:var(--blue);border:0.5px solid rgba(107,163,214,.3);padding:2px 8px;border-radius:4px;font-family:'DM Mono',monospace;font-size:10px;">TAXABLE</span></div>
+        <div style="color:var(--ink3);line-height:1.5;padding-left:12px;border-left:0.5px solid var(--border);">Wasting Roth space on VTI is the most common asset location mistake. VTI belongs in taxable — Roth is for assets that would face 40%+ rates.</div>
+      </div>
+
+      <!-- VXUS -->
+      <div style="display:grid;grid-template-columns:130px 1fr 120px 1fr;padding:11px 14px;border-bottom:0.5px solid var(--border);align-items:start;gap:0;font-size:11px;">
+        <div style="font-family:'DM Mono',monospace;color:var(--ink);font-weight:500;">VXUS</div>
+        <div style="color:var(--ink2);line-height:1.5;padding-right:12px;"><strong style="color:var(--green-l);">Foreign tax credit</strong> — foreign governments withhold tax on international dividends. In taxable you claim this as a dollar-for-dollar credit on your US return. In a 401k, the credit disappears. Taxable is genuinely better here.</div>
+        <div><span style="background:var(--blue-bg);color:var(--blue);border:0.5px solid rgba(107,163,214,.3);padding:2px 8px;border-radius:4px;font-family:'DM Mono',monospace;font-size:10px;">TAXABLE</span></div>
+        <div style="color:var(--ink3);line-height:1.5;padding-left:12px;border-left:0.5px solid var(--border);">Moving VXUS into a 401k surrenders the foreign tax credit — one of the few cases where taxable is the best account. Do not shelter international index funds.</div>
+      </div>
+
+      <!-- XLE -->
+      <div style="display:grid;grid-template-columns:130px 1fr 120px 1fr;padding:11px 14px;border-bottom:0.5px solid var(--border);align-items:start;gap:0;font-size:11px;">
+        <div style="font-family:'DM Mono',monospace;color:var(--ink);font-weight:500;">XLE</div>
+        <div style="color:var(--ink2);line-height:1.5;padding-right:12px;">Qualified dividends (~3% yield) at 23.8%. Taxed only on sale — low turnover. Tolerable in taxable, but if you're actively trading around the XLE/oil divergence signal, gains will be short-term.</div>
+        <div><span style="background:var(--blue-bg);color:var(--blue);border:0.5px solid rgba(107,163,214,.3);padding:2px 8px;border-radius:4px;font-family:'DM Mono',monospace;font-size:10px;">TAXABLE</span></div>
+        <div style="color:var(--ink3);line-height:1.5;padding-left:12px;border-left:0.5px solid var(--border);">If you're trading XLE actively (divergence signal exits), those gains are short-term. Consider holding the core in taxable but executing exits to avoid wash-sale complications.</div>
+      </div>
+
+      <!-- IAU / Gold -->
+      <div style="display:grid;grid-template-columns:130px 1fr 120px 1fr;padding:11px 14px;border-bottom:0.5px solid var(--border);align-items:start;gap:0;font-size:11px;background:rgba(212,168,71,.04);">
+        <div style="font-family:'DM Mono',monospace;color:var(--amber-l);font-weight:500;">IAU / GLD</div>
+        <div style="color:var(--ink2);line-height:1.5;padding-right:12px;"><strong style="color:var(--red-l);">Collectibles tax trap.</strong> IRS classifies gold ETFs as collectibles — taxed at 28% regardless of holding period, not the standard 20% LTCG rate. At your income: 28% + 3.8% NIIT = 31.8%. Same IAU in Roth: zero tax ever.</div>
+        <div><span style="background:var(--amber-bg);color:var(--amber-l);border:0.5px solid rgba(212,168,71,.3);padding:2px 8px;border-radius:4px;font-family:'DM Mono',monospace;font-size:10px;">ROTH / 401K</span></div>
+        <div style="color:var(--red-l);line-height:1.5;padding-left:12px;border-left:0.5px solid var(--border);">Holding IAU in taxable means every gain is taxed at 31.8% no matter how long you hold. The 1979 exit — where you sell 40–50% of position — would trigger a massive collectibles tax bill. Move IAU to Roth or 401k.</div>
+      </div>
+
+      <!-- PDBC -->
+      <div style="display:grid;grid-template-columns:130px 1fr 120px 1fr;padding:11px 14px;border-bottom:0.5px solid var(--border);align-items:start;gap:0;font-size:11px;background:rgba(212,168,71,.04);">
+        <div style="font-family:'DM Mono',monospace;color:var(--amber-l);font-weight:500;">PDBC</div>
+        <div style="color:var(--ink2);line-height:1.5;padding-right:12px;"><strong style="color:var(--red-l);">K-1 trap.</strong> PDBC is structured as a limited partnership — it issues a K-1 tax form every year even if you sold nothing. K-1s create phantom income, arrive late (often after April 15), and require complex filing. Inside a 401k: entirely irrelevant. The K-1 disappears.</div>
+        <div><span style="background:var(--green-bg);color:var(--green-l);border:0.5px solid rgba(82,180,122,.3);padding:2px 8px;border-radius:4px;font-family:'DM Mono',monospace;font-size:10px;">401K / 457B</span></div>
+        <div style="color:var(--red-l);line-height:1.5;padding-left:12px;border-left:0.5px solid var(--border);">Holding PDBC in taxable means annual K-1 headaches, phantom taxable income, and late tax forms every year. Zero benefit. Put PDBC in the 401k — the problem disappears completely.</div>
+      </div>
+
+      <!-- REITs / SCHH -->
+      <div style="display:grid;grid-template-columns:130px 1fr 120px 1fr;padding:11px 14px;border-bottom:0.5px solid var(--border);align-items:start;gap:0;font-size:11px;background:rgba(192,57,43,.04);">
+        <div style="font-family:'DM Mono',monospace;color:var(--red-l);font-weight:500;">SCHH / REITs</div>
+        <div style="color:var(--ink2);line-height:1.5;padding-right:12px;"><strong style="color:var(--red-l);">Ordinary income trap.</strong> REITs must distribute 90%+ of income — and those distributions are taxed as ordinary income, not qualified dividends. At your income: 40.8% rate annually, forced whether you want it or not. In 401k: zero annual drag.</div>
+        <div><span style="background:var(--green-bg);color:var(--green-l);border:0.5px solid rgba(82,180,122,.3);padding:2px 8px;border-radius:4px;font-family:'DM Mono',monospace;font-size:10px;">401K / 457B</span></div>
+        <div style="color:var(--red-l);line-height:1.5;padding-left:12px;border-left:0.5px solid var(--border);">$50K in REIT dividends in taxable = $20,400 tax bill annually, forced, unavoidable. Same $50K in a 401k = $0 annual tax. This is one of the highest-leverage location decisions available to you.</div>
+      </div>
+
+      <!-- HYG puts -->
+      <div style="display:grid;grid-template-columns:130px 1fr 120px 1fr;padding:11px 14px;border-bottom:0.5px solid var(--border);align-items:start;gap:0;font-size:11px;background:rgba(212,168,71,.07);">
+        <div style="font-family:'DM Mono',monospace;color:var(--amber-l);font-weight:500;">HYG puts<br>NVDA / PLTR puts</div>
+        <div style="color:var(--ink2);line-height:1.5;padding-right:12px;"><strong style="color:var(--red-l);">Short-term gain trap.</strong> Options typically expire in under 12 months — every gain is short-term ordinary income at 40.8%. A 5× win on $10K of premium = $40K gain = $16,320 tax in taxable. In Roth: the full $40K is yours, zero tax. The Burry structure only delivers its full asymmetry in the Roth.</div>
+        <div><span style="background:var(--amber-bg);color:var(--amber-l);border:0.5px solid rgba(212,168,71,.3);padding:2px 8px;border-radius:4px;font-family:'DM Mono',monospace;font-size:10px;">ROTH IRA ONLY</span></div>
+        <div style="color:var(--red-l);line-height:1.5;padding-left:12px;border-left:0.5px solid var(--border);">This is non-negotiable. All put options go in the Roth IRA. A 5× win in taxable becomes a 2.5× win after tax. In Roth it stays 5×. The structure Burry used only works if you execute it in the right account.</div>
+      </div>
+
+      <!-- TBF / SGOV -->
+      <div style="display:grid;grid-template-columns:130px 1fr 120px 1fr;padding:11px 14px;border-bottom:0.5px solid var(--border);align-items:start;gap:0;font-size:11px;">
+        <div style="font-family:'DM Mono',monospace;color:var(--ink);font-weight:500;">TBF / SGOV<br>Bonds / TIPS</div>
+        <div style="color:var(--ink2);line-height:1.5;padding-right:12px;">Bond interest is ordinary income — taxed at 40.8% annually in taxable. TBF generates short-term gains when bonds fall. Neither is tax-efficient in taxable. Both compound cleanly inside a 401k.</div>
+        <div><span style="background:var(--green-bg);color:var(--green-l);border:0.5px solid rgba(82,180,122,.3);padding:2px 8px;border-radius:4px;font-family:'DM Mono',monospace;font-size:10px;">401K / 457B</span></div>
+        <div style="color:var(--ink3);line-height:1.5;padding-left:12px;border-left:0.5px solid var(--border);">SGOV in taxable is acceptable as a cash equivalent / transition buffer — the yield is modest and the drag is manageable. TBF as an active rate hedge is better sheltered.</div>
+      </div>
+
+      <!-- HSA -->
+      <div style="display:grid;grid-template-columns:130px 1fr 120px 1fr;padding:11px 14px;align-items:start;gap:0;font-size:11px;background:rgba(82,180,122,.04);">
+        <div style="font-family:'DM Mono',monospace;color:var(--green-l);font-weight:500;">HSA<br>(Banner $450/yr)</div>
+        <div style="color:var(--ink2);line-height:1.5;padding-right:12px;"><strong style="color:var(--green-l);">Triple tax-free.</strong> Contributions pre-tax, growth tax-free, withdrawals tax-free for medical. At 65: acts like a 401k for any purpose. Invest in VTI and never touch it — every dollar compounds at zero tax drag. The most powerful account in existence per dollar contributed.</div>
+        <div><span style="background:var(--green-bg);color:var(--green-l);border:0.5px solid rgba(82,180,122,.3);padding:2px 8px;border-radius:4px;font-family:'DM Mono',monospace;font-size:10px;">HSA → VTI ONLY</span></div>
+        <div style="color:var(--green-l);line-height:1.5;padding-left:12px;border-left:0.5px solid var(--border);">Fund HSA first before any other account. Invest in VTI immediately — do not leave it in cash. Pay medical expenses out of pocket and keep receipts: you can reimburse yourself years later, letting the HSA compound tax-free the entire time.</div>
+      </div>
+
+    </div>
+
+    <!-- Fellowship transition callout -->
+    <div style="background:var(--bg2);border:0.5px solid var(--border2);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:16px 20px;">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.07em;margin-bottom:6px;">FELLOWSHIP TRANSITION — TAX LOCATION WINDOW</div>
+      <p style="font-size:12px;color:var(--ink2);line-height:1.7;">
+        When you start fellowship in July 2028, your income drops from ~$401K to ~$65K.
+        Your marginal rate collapses from 37% to 22%.
+        That is the window to execute <strong style="color:var(--ink)">Roth conversions</strong> —
+        moving any traditional IRA balances to Roth at 22 cents on the dollar
+        instead of 37 cents. Plan for this now.
+        The fellowship transition is not just a salary cut — it is a structured tax arbitrage opportunity
+        if you enter it with traditional IRA balances ready to convert.
+      </p>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-note">
+      Macro Signal Ledger · Burry Engine v1<br>
+      Generated: March 2026 · <code>burry_playbook.html</code><br>
+      Review weekly alongside prediction ledger
+    </div>
+    <div class="footer-disclaimer">
+      This is a personal reference document, not financial advice.
+      All investment decisions involve risk. Options can expire worthless.
+      Consult a licensed financial advisor before acting on any content here.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
